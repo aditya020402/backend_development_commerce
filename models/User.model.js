@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import validator from "validator";
-
+import avatarSchema from "./Avatar.model.js";
 
 const schema = new mongoose.Schema({
     name:{
@@ -24,15 +24,18 @@ const schema = new mongoose.Schema({
         minLength:[8,"password should be greater than 8 characters"],
         select:false,
     },
+    // avatar:{
+    //     public_id:{
+    //         type:String,
+    //         required:true,
+    //     },
+    //     url:{
+    //         type:String,
+    //         required:true,
+    //     }
+    // },
     avatar:{
-        public_id:{
-            type:String,
-            required:true,
-        },
-        url:{
-            type:String,
-            required:true,
-        }
+        type:avatarSchema,
     },
     role:{
         type:String,

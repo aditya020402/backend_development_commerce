@@ -1,5 +1,5 @@
 import mongoose from "mongoose";;
-
+import avatarSchema from "./Avatar.model.js";
 
 const schema = new mongoose.Schema({
     name:{
@@ -20,18 +20,21 @@ const schema = new mongoose.Schema({
         type:Number,
         default:0,
     },
-    images:[
-        {
-            public_id:{
-                type:String,
-                required:true,
-            },
-            url:{
-                type:String,
-                required:true,
-            }
-        }
-    ],
+    // images:[
+    //     {
+    //         public_id:{
+    //             type:String,
+    //             required:true,
+    //         },
+    //         url:{
+    //             type:String,
+    //             required:true,
+    //         }
+    //     }
+    // ],
+    images:{
+        type:[avatarSchema],
+    },
     category:{
         type:String,
         required:[true,"please enter product category"],
