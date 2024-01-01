@@ -2,6 +2,7 @@ const asyncError = (theFunc) => (req,res,next) => {
     Promise.resolve(theFunc(req,res,next)).catch((err)=>next(err));
 };
 
+export default asyncError;
 
 
 // another way 
