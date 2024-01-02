@@ -20,3 +20,5 @@ const sendStripeApiKey = asyncError(async(req,res,next)=>{
         stripeApiKey:process.env.STRIPE_API_KEY,
     })
 })
+
+export {processPayment,sendStripeApiKey};

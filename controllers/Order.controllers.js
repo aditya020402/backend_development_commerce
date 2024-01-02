@@ -115,3 +115,6 @@ const deleteOrder = asyncError(async(req,res,next)=>{
         success:true,
     })
 })
+
+
+export {deleteOrder,updateOrder,getAllOrdes,myOrders,getSingleOrder,newOrder};

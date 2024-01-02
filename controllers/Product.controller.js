@@ -221,3 +221,5 @@ const deleteReview = asyncError(async(req,res,next)=>{
         success:true,
     })
 })
+
+export {deleteReview,getProductReviews,createProduct,deleteProduct,createProductReview,updateProduct,getAdminProducts,getProductDetails,getAllProducts,createProduct};
