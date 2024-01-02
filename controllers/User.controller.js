@@ -38,7 +38,7 @@ const registerUser = asyncError(async(req,res,next)=>{
             url:myCloud.secure_url,
         }
     })
-    sendToken(user,201,res);
+    jwtToken(user,201,res);
 });
 
 //login the user
@@ -56,7 +56,7 @@ const loginUser = asyncError(async(req,res,next) => {
     if(!isPasswordMatched){
         return next(new ErrorHandler("Invalid email or password",401));
     }
-    sendToken(user,200,res);
+    jwtToken(user,200,res);
 });
 
 // logout the user
@@ -125,7 +125,7 @@ const resetPassword = asyncError(async(req,res,next)=>{
     user.resetPasswordExpire = undefined;
     
     await user.save();
-    sendToken(user,200,res);
+    jwtToken(user,200,res);
 
 })
 
@@ -153,7 +153,7 @@ const updatePassword = asyncError(async(req,res,next)=>{
     }
     user.password = req.body.newPassword;
     await user.save();
-    sendToken(user,200,res);
+    jwtToken(user,200,res);
 })
 
 // update user profile 
@@ -245,3 +245,4 @@ const deleteUser = asyncError(async(req,res,next)=>{
 
 
 export {registerUser,loginUser,logoutUser,forgotPassword,resetPassword,getUserDetails,updatePassword,updateProfile,getAllUser,getSingleUser,updateUserRole,deleteUser} ;
+
