@@ -75,7 +75,7 @@ schema.methods.comparePassword = async function(password){
 }
 
 schema.methods.getResetPasswordToken = function() {
-    const resetToken = crypto.randomBytes(20).toString("hex"); // output 16 Bytes of random data
+    const resetToken = crypto.randomBytes(20).toString("hex"); // output 20 Bytes of random hexdec. data
     this.getResetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
     this.resetPasswordExpire = Date.now()+15*60*1000;
     return resetToken;

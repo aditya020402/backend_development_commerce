@@ -1,5 +1,6 @@
 import {v2 as cloudinary} from "cloudinary";
 import fs from "fs";
+import ErrorHandler from "./errorhandler";
 
 cloudinary.config({
     cloud_name:process.env.CLOUDINARY_CLOUD_NAME,
@@ -8,11 +9,13 @@ cloudinary.config({
 });
 
 
-const uploadOnCloudinary = async(localFilePath) => {
+const uploadOnCloudinary = async(localFilePath,folder) => {
     try{
         if(!localFilePath) return null;
         const response = await cloudinary.uploader.upload(localFilePath,{
-            resource_type:"auto"
+            folder:`${folder}`,
+            width:150,
+            crop:"scale",
         })
         console.log("file uploaded on cloudinary");
         // file has been uploaded on cloudinary
@@ -26,4 +29,14 @@ const uploadOnCloudinary = async(localFilePath) => {
     }
 }
 
-export default uploadOnCloudinary;
+const deleteOnCloudinary = async(public_url) => {
+    try{
+        await cloudinary.uploader.destroy(public_url);
+    }
+    catch(error){
+        console.log("cloudinary error:",error);
+        return next(new ErrorHandler("Error in deleting image from cloudinary",400));
+    }
+}
+
+export {uploadOnCloudinary,deleteOnCloudinary};
