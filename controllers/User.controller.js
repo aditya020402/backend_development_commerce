@@ -14,7 +14,6 @@ import {uploadOnCloudinary,deleteOnCloudinary} from "../utils/cloudinary.js";
 //register the user
 
 const registerUser = asyncError(async(req,res,next)=>{
-
     const {name,email,password} = req.body;
     // const existedUser = await User.findOne({
     //     $or: [{ name }, { email }]
@@ -25,13 +24,14 @@ const registerUser = asyncError(async(req,res,next)=>{
     if (existedUser) {
        next(new ErrorHandler("User with email or username already exists",409));
     }
-
-    const avatarLocalPath = req.files?.avatar[0]?.path;
+    // console.log(req.files?.avatar[0].path);
+    const avatarLocalPath = req.files?.avatar[0].path;
     if(!avatarLocalPath){
         next(new ErrorHandler("Avatar file is required",400));
     }
+    // console.log(avatarLocalPath);
     const myCloud = await uploadOnCloudinary(avatarLocalPath,'avatar');
-
+    // console.log(myCloud);
     const user = await User.create({
         name,email,password,avatar:{
             public_id:myCloud.public_id,
@@ -49,10 +49,12 @@ const loginUser = asyncError(async(req,res,next) => {
         return next(new ErrorHandler("Please enter your email or password",400));
     }
     const user = await User.findOne({email}).select("+password");
+    console.log(user);
     if(!user){
         return next(new ErrorHandler("Invalid email or password",401));
     }
     const isPasswordMatched = await user.comparePassword(password);
+    console.log(isPasswordMatched);
     if(!isPasswordMatched){
         return next(new ErrorHandler("Invalid email or password",401));
     }
@@ -75,17 +77,19 @@ const logoutUser = asyncError(async(req,res,next)=>{
 
 // forgot password 
 
-const forgotPassword = asyncError(async(res,res,next)=>{
+const forgotPassword = asyncError(async(req,res,next)=>{
     const user = await User.findOne({
         email:req.body.email,
-    })
+    }).select("+password");
     if(!user){
         return next(new ErrorHandler("User not found",404));
     }
-    const resetToken = user.getResetPasswordToken();
-    await user.save({validateBeforeSave:false});
+    const resetToken = user.getResetPasswordTokens();
+    await user.save({ validateBeforeSave: false });
     const resetPasswordUrl = `${req.protocol}://${req.get("host")}/password/reset/${resetToken}`;
+    // console.log(resetPasswordUrl);
     const message = `Your password reset token is :- \n\n ${resetPasswordUrl} \n\n If you have not request this email then, please ignore it.`;
+    // console.log(message);
     try{
         await sendEmail({
             email:user.email,
@@ -108,16 +112,15 @@ const forgotPassword = asyncError(async(res,res,next)=>{
 // resetPassword 
 
 const resetPassword = asyncError(async(req,res,next)=>{
-
     const resetPasswordToken = crypto.createHash("sha256").update(req.params.token).digest("hex");
     const user = await User.findOne({
         resetPasswordToken,
-        resetPasswordExpire:{$get:Date.now()},
+        resetPasswordExpire:{$gt:Date.now()},
     });
     if(!user){
         return next(new ErrorHandler("Reset Password Token is invalid or has been expired"));
     }
-    if(req.body.password !== req.body.comfirmPassword){
+    if(req.body.password !== req.body.confirmPassword){
         return next(new ErrorHandler("Password does not match",400));
     }
     user.password = req.body.password;
@@ -166,14 +169,20 @@ const updateProfile = asyncError(async(req,res,next)=>{
     if(req.body.avatar !== ""){
         const user = await User.findById(req.user.id);
         const imageId = user.avatar.public_id;
-        await deleteOnCloudinary(imageId);
-        const myCloud = await uploadOnCloudinary(req.body.avatar,'avatar');
+        const val = await deleteOnCloudinary(imageId);
+        if(val === -1){
+            next(new ErrorHandler("Error in deleting image from cloudinary",400));
+        }
+        const avatarLocalPath = req.files?.avatar[0].path;
+        if(!avatarLocalPath){
+            next(new ErrorHandler("Avatar file is required",400));
+        }
+        const myCloud = await uploadOnCloudinary(avatarLocalPath,'avatar');
         newUserData.avatar={
             public_id:myCloud.public_id,
             url:myCloud.secure_url,
         }
     }
-
     const user = await User.findByIdAndUpdate(req.user.id,newUserData,{
         new:true,
         runValidators:true,
@@ -217,6 +226,9 @@ const updateUserRole = asyncError(async(req,res,next)=>{
         // email:req.body.email,
         role:req.body.role,
     };
+    // if(role !== "admin" && role !== "user" ){
+    //     next(new ErrorHandler("Not a valid role , enter a valid role",404))
+    // }
     await User.findByIdAndUpdate(req.params.id,newUserData,{
         new:true,
         runValidators:true,
@@ -235,8 +247,8 @@ const deleteUser = asyncError(async(req,res,next)=>{
         return next(new ErrorHandler(`User does not exist with id: ${req.params.id}`,400));
     }
     const imageId = user.avatar.public_id;
-    deleteOnCloudinary(imageId);
-    await user.remove();
+    await deleteOnCloudinary(imageId);
+    await User.deleteOne({_id:req.params.id});
     res.status(200).json({
         success:true,
         message:"user deleted successfully",

@@ -39,14 +39,19 @@ const schema = new mongoose.Schema({
     },
     role:{
         type:String,
+        enum:["user","admin"],
         default:"user",
     },
     createdAt:{
         type:Date,
         default:Date.now(),
     },
-    resetPasswordToken:String,
-    resetPasswordExpire:Date,
+    resetPasswordToken:{
+        type:String,
+    },
+    resetPasswordExpire:{
+        type:Date,
+    },
 },
     {
         timestamps:true,    
@@ -64,19 +69,21 @@ schema.pre("save",async function(next){
 // jwt token 
 
 schema.methods.getJWTToken = function(){
+    // generate and send the jwt token 
     return  jwt.sign({id:this._id},process.env.JWT_SECRET,{
-        expiredIn:process.env.JWT_EXPIRE,
+        expiresIn:process.env.JWT_EXPIRE,
     })
 }
 
 schema.methods.comparePassword = async function(password){
-    const decode = await bcrypt.compare(this.password,password);
+    // here the order of the parameters matter
+    const decode = await bcrypt.compare(password,this.password);
     return decode;
 }
 
-schema.methods.getResetPasswordToken = function() {
+schema.methods.getResetPasswordTokens = function() {
     const resetToken = crypto.randomBytes(20).toString("hex"); // output 20 Bytes of random hexdec. data
-    this.getResetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+    this.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
     this.resetPasswordExpire = Date.now()+15*60*1000;
     return resetToken;
 }

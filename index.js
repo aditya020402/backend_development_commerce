@@ -1,6 +1,7 @@
 import express from "express";
 import connectDB  from "./database/connectDB.js";
 import dotenv from "dotenv";
+import {v2 as cloudinary} from "cloudinary";
 dotenv.config({
     "path":"config.env",
 })
@@ -13,6 +14,11 @@ const start  = async() => {
         app.listen(port,()=>{
             console.log(`listening to server at port ${port}`);
         })
+        cloudinary.config({
+            cloud_name:process.env.CLOUDINARY_CLOUD_NAME,
+            api_key:process.env.CLOUDINARY_API_KEY,
+            api_secret:process.env.CLOUDINARY_API_SECRET,
+        });
     }
     catch(error){
         console.log("some error occured: ", error);
