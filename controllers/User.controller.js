@@ -166,7 +166,7 @@ const updateProfile = asyncError(async(req,res,next)=>{
         name:req.body.name,
         email:req.body.email,
     };
-    if(req.body.avatar !== ""){
+    if(req.files.avatar.length!==0){
         const user = await User.findById(req.user.id);
         const imageId = user.avatar.public_id;
         const val = await deleteOnCloudinary(imageId);

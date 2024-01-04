@@ -3,7 +3,7 @@ const app = express();
 import cookieParser from "cookie-parser";
 // import orderRoute from "./routes/Order.route.js";
 // import paymentRoute from "./routes/Payment.route.js";
-// import productRoute from "./routes/Product.route.js";
+import productRoute from "./routes/Product.route.js";
 import userRoute from "./routes/User.route.js";
 import errorHandlerMiddleware from "./middleware/errors.js";
 
@@ -26,7 +26,7 @@ app.get("/",(req,res)=>{
     res.send("route is working and their is not issue");
 })
 
-// app.use("/api/v1",productRoute);
+app.use("/api/v1",productRoute);
 app.use("/api/v1",userRoute);
 // app.use("/api/v1",orderRoute);
 // app.use("/api/v1",paymentRoute);
