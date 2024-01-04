@@ -167,7 +167,7 @@ const createProductReview = asyncError(async(req,res,next)=>{
     }
     let avg = 0;
     product.reviews.forEach((rev)=>{
-        avg += avg.rating;
+        avg += rev.rating;
     })
     product.ratings = avg/product.reviews.length;
     await product.save({validateBeforeSave:false});
